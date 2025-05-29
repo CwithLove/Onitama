@@ -17,9 +17,6 @@ public class Master extends Piece {
     public Master(Master master) {
         super(master);
         // Ensure type is MASTER if superclass copy doesn't guarantee it
-        if (this.getType() != TypePiece.MASTER) {
-            super.setType(TypePiece.MASTER);
-        }
     }
     /* --- --- --- --- --- */
 

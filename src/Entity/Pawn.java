@@ -21,9 +21,7 @@ public class Pawn extends Piece {
     public Pawn(Pawn pawn) {
         super(pawn); // Call the Piece copy constructor
         // Ensure type is PAWN if superclass copy doesn't guarantee it
-        if (this.getType() != TypePiece.PAWN) {
-            super.setType(TypePiece.PAWN);
-        }
+
     }
     /* --- --- --- --- --- */
 

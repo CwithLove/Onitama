@@ -5,18 +5,33 @@ import java.util.*;
 import java.util.List;
 
 public class MoveCard {
-    private String cardName;
-    private List<Point> moves;
+    private final String cardName;
+    private final List<Point> moves;
+    private final int starting;
 
-    public MoveCard(String cardName, List<Point> moves) {
+    /* --- Constructors --- */
+    public MoveCard(String cardName, List<Point> moves, int starting) {
         this.cardName = cardName;
         this.moves = moves;
+        this.starting = starting;
     }
+
     // copy constructor
     public MoveCard(MoveCard moveCard) {
         this.cardName = moveCard.cardName;
-        this.moves = moveCard.moves;
+        this.moves = new ArrayList<>();
+        for (Point move : moveCard.moves) {
+            if (move == null) {
+                throw new IllegalArgumentException("MoveCard: Move cannot be null");
+            }
+            this.moves.add(new Point(move.x, move.y)); // Create a new Point to avoid reference issues
+        }
+        this.starting = moveCard.starting;
     }
+    /* --- --- --- --- --- */
+
+    /* --------------- */
+    /* --- Getters --- */
     /**
      * @return The name of the move card.
      */
@@ -29,6 +44,18 @@ public class MoveCard {
     public List<Point> getMoves() {
         return moves;
     }
+
+    /**
+     * @return The starting player of the move card.
+     */
+    public int getStarting() {
+        return starting;
+    }
+    /* --- --- --- --- --- */
+
+
+    /* ----------------- */
+    /* --- Utilities --- */
     /**
      * Validates if the move card can be played from a given piece's position to a target position on the board.
      * @param piece The piece to move.
@@ -53,13 +80,34 @@ public class MoveCard {
 
     @Override
     public boolean equals(Object o) {
+        if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
+        
         MoveCard moveCard = (MoveCard) o;
-        return Objects.deepEquals(moves, moveCard.moves);
+        return Objects.equals(cardName, moveCard.cardName) && // Card
+                Objects.equals(moves, moveCard.moves); // all the list
     }
 
     @Override
     public int hashCode() {
-        return Arrays.deepHashCode(moves);
+        return Objects.hash(cardName, moves);
     }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(cardName)
+          .append(" => Moves: ");
+
+        for (int i = 0; i < moves.size(); i++) {
+            Point move = moves.get(i);
+            sb.append("(").append(move.x).append(", ").append(move.y).append(")");
+            if (i < moves.size() - 1) {
+                sb.append("; ");
+            }
+        }
+        sb.append(", starting=").append(starting);
+        return sb.toString();
+    }
+    /* --- --- --- --- --- */
 }

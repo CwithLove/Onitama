@@ -1,6 +1,8 @@
 package Entity;
 
 import java.awt.Point;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Board {
     private int columns;
@@ -17,32 +19,22 @@ public class Board {
         if (row <= 0 || col <= 0) {
             throw new IllegalArgumentException("Row and column counts must be positive.");
         }
-        if (row > 5 || col > 5) {
-            throw new IllegalArgumentException("Row and column counts must not exceed 8.");
-        }
+        // if (row > 5 || col > 5) {
+        //     throw new IllegalArgumentException("Row and column counts must not exceed 5.");
+        // }
         this.grid = new Piece[row][col];
 
-        // Initialize the grid with null values
-        for (int i = 0; i < row; i++) {
-            for (int j = 0; j < col; j++) {
-                if (j == 0) {
-                    if (i == 2) {
-                        this.grid[i][j] = new Master(1, i, j); // Place Master for player 1
-                    } else {
-                        this.grid[i][j] = new Pawn(1, i, j); // Place Pawns for player 1
-                    }
-                } else if (j == col - 1) {
-                    if (i == 2) {
-                        this.grid[i][j] = new Master(2, i, j); // Place Master for player 2
-                    } else {
-                        this.grid[i][j] = new Pawn(2, i, j); // Place Pawns for player 2
-                    }
-                } else
-                this.grid[i][j] = null; // Empty cells are initialized to null
+        for (int r = 0; r < this.rows; r++) {
+            if (r == 2) {
+                this.grid[r][0] = new Master(1, r, 0); // Place Master for player 1
+                this.grid[r][col - 1] = new Master(2, r, col - 1); // Place Master for player 2
+                continue; // Skip placing Pawns in the Master row
             }
+            this.grid[r][0] = new Pawn(1, r, 0); // Place Pawns for player 1
+            this.grid[r][col - 1] = new Pawn(2, r, col - 1); // Place Pawns for player 2
         }
     }
-    
+
     public Board() {
         this(5, 5);
     }
@@ -62,8 +54,8 @@ public class Board {
                     } else if (p.isPawn()) {
                         this.grid[i][j] = new Pawn((Pawn) p);
                     }
-                    //  else {
-                    //     throw new IllegalArgumentException("Unknown piece type in the board copy.");
+                    // else {
+                    // throw new IllegalArgumentException("Unknown piece type in the board copy.");
                     // }
                 } else {
                     this.grid[i][j] = null; // Keep empty cells as null
@@ -72,7 +64,6 @@ public class Board {
         }
     }
     /* --- --- --- --- --- */
-
 
     /* --------------- */
     /* --- Getters --- */
@@ -94,7 +85,43 @@ public class Board {
         }
         return grid[row][col];
     }
+
+    public Piece getPieceAt(Point position) {
+        if (position == null) {
+            throw new IllegalArgumentException("Position cannot be null.");
+        }
+        return getPieceAt(position.x, position.y);
+    }
+    
+    public List<Piece> getPiecesForPlayer(int playerId) {
+        List<Piece> pieces = new ArrayList<>();
+
+        for (int r = 0; r < this.rows; r++) {
+            for (int c = 0; c < this.columns; c++) {
+                Piece p = this.grid[r][c];
+                if (p != null && p.getPlayerId() == playerId) {
+                    pieces.add(p);
+                }
+            }
+        }
+
+        return pieces;
+    }
+
+    public Master getMasterForPlayer(int playerId) {
+        for (int r = 0; r < this.rows; r++) {
+            for (int c = 0; c < this.columns; c++) {
+                Piece p = this.grid[r][c];
+                if (p != null && p.getPlayerId() == playerId && p.isMaster()) {
+                    return (Master) p;
+                }
+            }
+        }
+        return null; // Master not found
+    }
     /* --- --- --- --- --- */
+
+
 
     /* --------------- */
     /* --- Setters --- */
@@ -103,6 +130,13 @@ public class Board {
             throw new IndexOutOfBoundsException("Invalid row or column index.");
         }
         grid[row][col] = piece;
+    }
+
+    public void setPieceAt(Point position, Piece piece) {
+        if (position == null) {
+            throw new IllegalArgumentException("Position cannot be null.");
+        }
+        setPieceAt(position.x, position.y, piece);
     }
 
     public void setGrid(Piece[][] grid) {
@@ -132,7 +166,7 @@ public class Board {
         }
         return true; // No empty cells found
     }
-    
+
     public boolean isValidPosition(int row, int col) {
         return row >= 0 && row < rows && col >= 0 && col < columns;
     }
@@ -143,14 +177,18 @@ public class Board {
     /* --- --- --- --- --- */
 
 
+
     /* ----------------- */
     /* --- Utilities --- */
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         Board board = (Board) o;
-        if (columns != board.columns || rows != board.rows) return false;
+        if (columns != board.columns || rows != board.rows)
+            return false;
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < columns; j++) {
                 Piece thisPiece = this.grid[i][j];
@@ -161,6 +199,10 @@ public class Board {
             }
         }
         return true;
+    }
+
+    public void printPossibleMoves(ArrayList<Point> moves) {
+        System.out.println(this.toString(moves));
     }
 
     @Override
@@ -177,23 +219,38 @@ public class Board {
         return result;
     }
 
-    @Override
-    public String toString() {
+    public String toString(ArrayList<Point> moves) {
         StringBuilder sb = new StringBuilder();
         sb.append("Board ").append(rows).append("x").append(columns).append(":\n");
+        for (int i = 0; i < columns; i++) {
+            sb.append("    ").append(i);
+        }
+        sb.append("\n");
         for (int i = 0; i < rows; i++) {
+            sb.append(i).append(" ");
             for (int j = 0; j < columns; j++) {
                 Piece piece = grid[i][j];
                 if (piece == null) {
-                    sb.append("[  ]"); // Empty cell
+                    if (moves != null && moves.contains(new Point(i, j))) {
+                        sb.append("[><]"); // Highlight possible moves
+                    } else {
+                        sb.append("[  ]"); // Empty cell
+                    }
                 } else {
-                    sb.append("[" + piece.toString(false) + "]"); // Use the Piece's toString method
+                    sb.append("[");
+                    sb.append(piece.toString(false));
+                    sb.append("]"); // Use the Piece's toString method
                 }
                 sb.append(" ");
-            }
+            } 
             sb.append("\n");
         }
         return sb.toString();
+    }
+
+    @Override
+    public String toString() {
+        return toString(null); // Default to no highlighted moves
     }
     /* --- --- --- --- --- */
 }

@@ -1,20 +1,31 @@
 package Entity;
 
-import java.awt.*;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Player {
     //MoveCard that a player own, limit to 2 per player
-    private List<MoveCard> moveCards = new java.util.ArrayList<>();
-    // List of Piece that a player own, 1 Master + 4 Pawn
-    private List<Piece> pieces = new java.util.ArrayList<>();
+    private List<MoveCard> moveCards;
     // Player id : 1 for blue, 2 for red
     private int id;
 
+    /* -------------------- */
+    /* --- Constructors --- */
     public Player(int id) {
         this.id = id;
-
+        moveCards = new ArrayList<>();
     }
+
+    // Copy constructor
+    public Player(Player player) {
+        this.id = player.id;
+        this.moveCards = new ArrayList<>(player.moveCards);
+    }
+    /* --- --- --- --- --- */
+
+
+    /* -------------- */
+    /* --- Getter --- */
     /**
      * @return The ID of the player.
      */
@@ -22,46 +33,92 @@ public class Player {
         return id;
     }
 
+    
     /**
-     * Adds a move card to the player's hand if the card is valid and the player has less than 2 cards.
-     * @param moveCard The move card to add.
-     * @return True if the card was added successfully, false otherwise.
+     * @return A list of move cards that the player owns.
      */
-    public boolean addMoveCard(MoveCard moveCard) {
-        if (Deck.valid(moveCard) && moveCards.size() < 2) {
-            moveCards.add(moveCard);
-            return true;
-        }
-        return false;
+    public List<MoveCard> getMoveCards() {
+        return moveCards;
     }
+
+    /* --- --- --- --- --- */
+
+
+    /* -------------- */
+    /* --- Setter --- */
     /**
-     * Get all the piece belong to the player from the board.
-     * @param board The game board where the piece is placed.
-     * @return True if the piece was return successfully, false otherwise.
+     * Sets the player's ID.
+     * @param id The new ID for the player.
      */
-    public boolean setPiece(Board board){
-        if (board == null) {
+    public void setId(int id) {
+        this.id = id;
+    }
+
+
+    /**
+     * Sets the player's move cards.
+     * @param moveCards The new list of move cards for the player.
+     */
+    public void setMoveCards(List<MoveCard> moveCards) {
+        if (moveCards != null) {
+            this.moveCards = new ArrayList<>(moveCards);
+        } else {
+            this.moveCards = new ArrayList<>();
+        }
+    }
+
+    /* --- --- --- --- --- */
+
+
+    /* ----------------- */
+    /* --- Utilities --- */
+    // Add a move card to the player's list of move cards. (< 2 per player)
+    public boolean addMoveCard(MoveCard moveCard) {
+        if (moveCard == null || moveCards.size() >= 2) {
+            return false; // Cannot add null or exceed limit
+        }
+        moveCards.add(moveCard);
+        return true;
+    }
+
+    // Remove a move card from the player's list of move cards.
+    public boolean removeMoveCard(MoveCard moveCard) {
+        if (moveCard == null || !moveCards.contains(moveCard)) {
+            return false; // Cannot remove null or non-existent card
+        }
+        moveCards.remove(moveCard);
+        return true;
+    }
+
+    public boolean hasMoveCard(MoveCard moveCard) {
+        if (moveCard == null) {
+            return false; // Cannot check for null move card
+        }
+        return moveCards.contains(moveCard);
+    }
+
+    public boolean exchangeMoveCard(MoveCard oldCard, MoveCard newCard) {
+        if (oldCard == null || newCard == null) {
             return false;
         }
-        pieces = board.getPiecesByPlayerId(id);
-        return pieces != null && !pieces.isEmpty();
+        if (this.moveCards.remove(oldCard)) {
+            return this.moveCards.add(newCard);
+        }
+        return false; // cardToRemove was not in hand
     }
-    /**
-     * play a move card from the player's hand.
-     * @param moveCard The move card to play.
-     * @param piece The piece to move.
-     * @return The move card if the move was successful, null if otherwise.
-     */
-    public MoveCard playMoveCard(MoveCard moveCard, Piece piece, Board board, Point targetPosition) {
-        if (moveCards.contains(moveCard) && pieces.contains(piece)) {
-            // TODO: Check if the position is valid according to the MoveCard rules(code in MoveCard.java)
-            if (moveCards.validPosition(piece, board, targetPosition)) {
-                moveCards.remove(moveCard);
-                //TODO: Check if the move is valid according to the game rules(code in Board.java)
-                board.movePiece(piece, targetPosition);
-                return moveCard;
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Player{id=").append(id).append(", moveCards=[");
+        for (int i = 0; i < moveCards.size(); i++) {
+            sb.append(moveCards.get(i).getCardName()); // Assuming MoveCard has getName()
+            if (i < moveCards.size() - 1) {
+                sb.append(", ");
             }
         }
-        return null;
+        sb.append("]}");
+        return sb.toString();
     }
+    /* --- --- --- --- --- */
 }
