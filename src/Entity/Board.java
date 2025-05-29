@@ -20,7 +20,8 @@ public class Board {
             throw new IllegalArgumentException("Row and column counts must be positive.");
         }
         // if (row > 5 || col > 5) {
-        //     throw new IllegalArgumentException("Row and column counts must not exceed 5.");
+        // throw new IllegalArgumentException("Row and column counts must not exceed
+        // 5.");
         // }
         this.grid = new Piece[row][col];
 
@@ -92,7 +93,7 @@ public class Board {
         }
         return getPieceAt(position.x, position.y);
     }
-    
+
     public List<Piece> getPiecesForPlayer(int playerId) {
         List<Piece> pieces = new ArrayList<>();
 
@@ -120,8 +121,6 @@ public class Board {
         return null; // Master not found
     }
     /* --- --- --- --- --- */
-
-
 
     /* --------------- */
     /* --- Setters --- */
@@ -175,8 +174,6 @@ public class Board {
         return isValidPosition(position.x, position.y);
     }
     /* --- --- --- --- --- */
-
-
 
     /* ----------------- */
     /* --- Utilities --- */
@@ -237,12 +234,16 @@ public class Board {
                         sb.append("[  ]"); // Empty cell
                     }
                 } else {
-                    sb.append("[");
-                    sb.append(piece.toString(false));
-                    sb.append("]"); // Use the Piece's toString method
+                    if (moves != null && moves.contains(new Point(i, j))) {
+                        sb.append("[x").append(piece.getPlayerId()).append("]"); // Highlighted piece
+                    } else {
+                        sb.append("[");
+                        sb.append(piece.toString(false));
+                        sb.append("]"); // Use the Piece's toString method
+                    }
                 }
                 sb.append(" ");
-            } 
+            }
             sb.append("\n");
         }
         return sb.toString();

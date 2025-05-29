@@ -150,9 +150,9 @@ public class GameState {
             Point opponentTempleArch;
 
             if (opponentPlayer.getId() == player1.getId()) {
-                opponentTempleArch = new Point(4, 2);
+                opponentTempleArch = new Point(2, 0);
             } else {
-                opponentTempleArch = new Point(0, 2);
+                opponentTempleArch = new Point(2, 4);
             }
 
             if (currentPlayerMasterPos.equals(opponentTempleArch)) {
@@ -361,8 +361,6 @@ public class GameState {
         // Verify win conditions after the move
         int winnerId = checkWinConditions();
         if (winnerId != 0) {
-            System.out.println("GameState: Player " + winnerId + " wins!");
-            System.out.println(gameStatus);
             return true;
         }
 
