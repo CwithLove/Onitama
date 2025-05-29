@@ -1,8 +1,8 @@
 package Entity;
 
-public class GameState {
+public class GameState {   
     public void startGame() {
-        // Initialize game state
-        System.out.println("Game started.");
+        // Initialize game state and start the game
+        System.out.println("Game has started!");
     }
 }
