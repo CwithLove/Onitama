@@ -475,14 +475,14 @@ public class GameState {
                         System.out.println(); // New line after printing all possible moves
                     }
 
-                    this.board.printPossibleMoves(possibleMoves);; // Print the board with possible moves highlighted
+                    this.board.printPossibleMoves(possibleMovesForCard); // Print the board with possible moves highlighted
 
                     // 3. Get Target Position
                     System.out.print("Enter target row and column to move to (e.g., '3 2'): ");
                     int targetRow = scanner.nextInt();
                     int targetCol = scanner.nextInt();
                     scanner.nextLine(); // Consume newline
-                    if (targetRow == -1 && targetCol == -1) {
+                    if (targetRow == 9 && targetCol == 9) {
                         System.out.println("Cancelling turn. Please select a different piece or card.");
                         continue;
                     }
