@@ -81,7 +81,7 @@ Below is a detailed description of each class within the `Entity` package:
 * **Purpose:** Represents a player in the game.
 * **Key Attributes:**
     * `id` (int): The player's ID (usually 1 or 2).
-    * `moveCards` (List<MoveCard>): The list of movement cards the player currently holds (maximum of 2).
+    * `moveCards` (ArrayArrayArrayList<MoveCard>): The list of movement cards the player currently holds (maximum of 2).
 * **Key Methods:**
     * Getters and setters for attributes.
     * `addMoveCard(MoveCard)`: Adds a card to the player's hand (if they have less than 2).

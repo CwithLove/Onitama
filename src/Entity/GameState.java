@@ -194,7 +194,7 @@ public class GameState {
         }
 
         List<Piece> playerPieces = this.board.getPiecesForPlayer(player.getId());
-        List<MoveCard> playerCards = player.getMoveCards();
+        ArrayList<MoveCard> playerCards = player.getMoveCards();
 
         for (Piece piece : playerPieces) {
             Point piecePosition = piece.getPosition();
@@ -255,7 +255,7 @@ public class GameState {
         }
 
         // Shuffle the card
-        List<MoveCard> shuffleDeck = new ArrayList<>(Arrays.asList(deckCards));
+        ArrayList<MoveCard> shuffleDeck = new ArrayList<>(Arrays.asList(deckCards));
         Collections.shuffle(shuffleDeck);
 
         // Distribute the cards: 2 for p1, 2 for p2, 1 neutral
@@ -379,6 +379,17 @@ public class GameState {
         this.currentPiece = null; // Reset current piece for the new turn
         System.out.println("GameState: Switched to Player " + this.currentPlayerId + "'s turn.");
     }
+
+    public void resetGame() {
+        this.board = new Board();
+        this.player1 = new Player(1);
+        this.player2 = new Player(2);
+        this.currentPlayerId = 1; // Start with player 1
+        this.gameStatus = "ongoing"; // Initial game status
+        this.currentPiece = null;
+        this.neutralCardMove = null;
+        System.out.println("GameState: Game has been reset.");
+    }
     /* --- --- --- --- --- */
 
     /* ----------------------- */
@@ -404,7 +415,7 @@ public class GameState {
             System.out.println("------------------------------------------");
             System.out.println("It's Player " + currentPlayer.getId() + "'s turn.");
             System.out.println("Player " + currentPlayer.getId() + " cards: ");
-            List<MoveCard> playerCards = currentPlayer.getMoveCards();
+            ArrayList<MoveCard> playerCards = currentPlayer.getMoveCards();
             for (int i = 0; i < playerCards.size(); i++) {
                 System.out.println((i + 1) + ". " + playerCards.get(i));
                 // Optionally print card moves: System.out.println(" Moves: " +

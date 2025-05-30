@@ -1,11 +1,10 @@
 package Entity;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class Player {
     //MoveCard that a player own, limit to 2 per player
-    private List<MoveCard> moveCards;
+    private ArrayList<MoveCard> moveCards;
     // Player id : 1 for blue, 2 for red
     private int id;
 
@@ -37,7 +36,7 @@ public class Player {
     /**
      * @return A list of move cards that the player owns.
      */
-    public List<MoveCard> getMoveCards() {
+    public ArrayList<MoveCard> getMoveCards() {
         return moveCards;
     }
 
@@ -59,7 +58,7 @@ public class Player {
      * Sets the player's move cards.
      * @param moveCards The new list of move cards for the player.
      */
-    public void setMoveCards(List<MoveCard> moveCards) {
+    public void setMoveCards(ArrayList<MoveCard> moveCards) {
         if (moveCards != null) {
             this.moveCards = new ArrayList<>(moveCards);
         } else {
