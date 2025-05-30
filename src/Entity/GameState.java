@@ -239,8 +239,6 @@ public class GameState {
         }
         return possibleMoves;
     }
-
-
     /* --- --- --- --- --- */
 
 

@@ -29,7 +29,7 @@ public class NeutralCardPanel extends JPanel {
             // Create the CardComponent. It will use its own dynamic drawing.
             // The preferred size (150, 100) passed here is for the CardComponent's
             // own preference, but BorderLayout will resize it.
-            neutralCardComponent = new CardComponent(card, null, 150, 100); 
+            neutralCardComponent = new CardComponent(card, null, 150, 100, 3); 
             
             // Highlight the border of the CardComponent based on the starting player
             if (card.getStarting() == 1) { // Player 1's turn color for card

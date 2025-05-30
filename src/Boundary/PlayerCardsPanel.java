@@ -94,7 +94,7 @@ public class PlayerCardsPanel extends JPanel {
         for (MoveCard card : cards) {
             // The preferred size (150, 100) is a hint for CardComponent.
             // GridLayout will ultimately determine its actual size.
-            CardComponent cardComp = new CardComponent(card, controller, 150, 100); 
+            CardComponent cardComp = new CardComponent(card, controller, 150, 100, playerId); 
             // cardComp.setAlignmentX(Component.CENTER_ALIGNMENT); // Not needed for GridLayout
 
             // Highlight if it is the card currently selected by this player

@@ -11,6 +11,7 @@ import javax.swing.*;
 public class CardComponent extends JPanel {
     private MoveCard card;
     private GameController controller;
+    int playerId; // Player ID for this card component
 
     // Dynamically calculated sizes
     private int dynamicGridSize;
@@ -21,9 +22,10 @@ public class CardComponent extends JPanel {
 
     /* ------------------- */
     /* --- Constructor --- */
-    public CardComponent(MoveCard card, GameController controller, int preferredWidth, int preferredHeight) {
+    public CardComponent(MoveCard card, GameController controller, int preferredWidth, int preferredHeight, int playerId) {
         this.card = card;
         this.controller = controller;
+        this.playerId = playerId;
         setPreferredSize(new Dimension(preferredWidth, preferredHeight)); // Set preferred size
         setBorder(BorderFactory.createLineBorder(Color.GRAY));
 
@@ -117,8 +119,6 @@ public class CardComponent extends JPanel {
         if (this.dynamicGridOffsetX + totalGridActualWidth > panelWidth) {
              this.dynamicGridOffsetX = Math.max(0, panelWidth - totalGridActualWidth -1);
         }
-
-
     }
 
 
@@ -169,23 +169,37 @@ public class CardComponent extends JPanel {
         // Draw moves (relative to the center [2,2] in the 5x5 grid)
         g2d.setColor(Color.BLUE);
         List<Point> moves = card.getMoves(); // These are (deltaRow, deltaCol) from Entity.Point
-        for (Point move : moves) {
-            // The card display is consistent: deltaRow points "up" on card (decrease in row index), 
-            // deltaCol points "right" on card (increase in col index).
-            // Center of grid is (row 2, col 2).
-            // A move like (dx, dy) from your Point (which is deltaRow, deltaCol) means:
-            // targetRowOnGrid = 2 + move.x (since -ve move.x means 'up' or smaller row index on grid)
-            // targetColOnGrid = 2 + move.y
-            int targetRowOnGrid = 2 + move.x; 
-            int targetColOnGrid = 2 + move.y; 
-            
-            if (targetRowOnGrid >= 0 && targetRowOnGrid < 5 && targetColOnGrid >=0 && targetColOnGrid < 5) {
-                 g2d.fillRect(dynamicGridOffsetX + targetColOnGrid * dynamicGridSize, 
-                              dynamicGridOffsetY + targetRowOnGrid * dynamicGridSize, 
-                              dynamicGridSize, dynamicGridSize);
+        if (this.playerId == 1 || this.playerId == 3) { // Player 1's perspective
+
+            for (Point move : moves) {
+                // The card display is consistent: deltaRow points "up" on card (decrease in row index), 
+                // deltaCol points "right" on card (increase in col index).
+                // Center of grid is (row 2, col 2).
+                // A move like (dx, dy) from your Point (which is deltaRow, deltaCol) means:
+                // targetRowOnGrid = 2 + move.x (since -ve move.x means 'up' or smaller row index on grid)
+                // targetColOnGrid = 2 + move.y
+                int targetRowOnGrid = 2 + move.x; 
+                int targetColOnGrid = 2 + move.y; 
+                
+                if (targetRowOnGrid >= 0 && targetRowOnGrid < 5 && targetColOnGrid >=0 && targetColOnGrid < 5) {
+                     g2d.fillRect(dynamicGridOffsetX + targetColOnGrid * dynamicGridSize, 
+                                  dynamicGridOffsetY + targetRowOnGrid * dynamicGridSize, 
+                                  dynamicGridSize, dynamicGridSize);
+                }
+            } 
+        } else {
+            for (Point move : moves) {
+                int targetRowOnGrid = 2 - move.x; 
+                int targetColOnGrid = 2 - move.y; 
+                
+                if (targetRowOnGrid >= 0 && targetRowOnGrid < 5 && targetColOnGrid >=0 && targetColOnGrid < 5) {
+                     g2d.fillRect(dynamicGridOffsetX + targetColOnGrid * dynamicGridSize, 
+                                  dynamicGridOffsetY + targetRowOnGrid * dynamicGridSize, 
+                                  dynamicGridSize, dynamicGridSize);
+                }
             }
+
         }
-        
         // Draw starting player indicator (small dot or symbol)
         g2d.setColor(card.getStarting() == 1 ? new Color(0,0,200) : new Color(200,0,0)); // Brighter Blue/Red
         int indicatorSize = Math.max(5, dynamicGridSize * 2 / 3);
