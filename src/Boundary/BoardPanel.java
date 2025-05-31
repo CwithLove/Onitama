@@ -32,6 +32,7 @@ public class BoardPanel extends JPanel {
     private final int ANIMATION_DELAY = 15;
     private final int ANIMATION_STEPS = 20;
 
+    /* --- Constructors --- */
     public BoardPanel(GameController controller) {
         this.controller = controller;
         this.possibleMoves = new ArrayList<>();
@@ -60,7 +61,12 @@ public class BoardPanel extends JPanel {
             }
         });
     }
+    /* --- --- --- --- --- */
 
+
+
+    /* ------------------- */
+    /* --- Update View --- */
     /**
      * Recalculates cell size, piece size, and offsets based on current panel dimensions and board configuration.
      * This should be called before any painting or coordinate calculations that depend on panel size.
@@ -116,7 +122,11 @@ public class BoardPanel extends JPanel {
         revalidate(); 
         repaint();
     }
+    /* --- --- --- --- --- */
     
+
+    /* --------------- */
+    /* --- Setters --- */
     public void setSelectedPiece(Piece piece) {
         this.selectedPiece = piece;
     }
@@ -124,7 +134,12 @@ public class BoardPanel extends JPanel {
     public void setPossibleMoves(List<Point> moves) {
         this.possibleMoves = (moves != null) ? moves : new ArrayList<>();
     }
+    /* --- --- --- --- --- */
 
+
+
+    /* ----------------- */
+    /* --- Animation --- */
     public void animateMove(Piece piece, Point boardFromPos, Point boardToPos, Runnable onAnimationComplete) {
         updateDynamicDimensions(); // Ensure dimensions are current before calculating animation path
 
@@ -282,4 +297,5 @@ public class BoardPanel extends JPanel {
             g2d.drawString("P", centerX - fm.stringWidth("P") / 2, centerY + fm.getAscent() / 2 - fm.getDescent()/2);
         }
     }
+    /* --- --- --- --- --- */
 }
