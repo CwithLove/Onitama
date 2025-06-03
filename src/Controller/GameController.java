@@ -1,29 +1,20 @@
 package Controller;
 
 import Boundary.GameView;
-import Entity.*; // Sẽ tạo sau
+import Entity.*;
 import java.awt.Point;
 
 public class GameController {
-    // Attributs
     private GameState gameState;
-    private GameView gameView; // Tham chiếu đến View
+    private GameView gameView;
 
-    // Save selected piece and card for the current turn
     private Piece selectedPiece = null;
     private MoveCard selectedCard = null;
 
-    /* ------------------- */
-    /* --- Contructors --- */
     public GameController() {
         this.gameState = new GameState();
     }
-    /* ------------------- */
 
-
-    
-    /* --------------- */
-    /* --- Setters --- */
     public void setView(GameView gameView) {
         this.gameView = gameView;
     }
@@ -34,17 +25,18 @@ public class GameController {
 
     public void setSelectedPiece(Piece selectedPiece) {
         this.selectedPiece = selectedPiece;
+        if (gameView != null) {
+            gameView.highlightSelectedPiece(this.selectedPiece);
+        }
     }
 
     public void setSelectedCard(MoveCard selectedCard) {
         this.selectedCard = selectedCard;
+        if (gameView != null) {
+            gameView.highlightSelectedCard(this.selectedCard);
+        }
     }
-    /* --- --- --- --- --- */
 
-
-
-    /* --------------- */
-    /* --- Getters --- */
     public GameState getGameState() {
         return gameState;
     }
@@ -56,142 +48,140 @@ public class GameController {
     public MoveCard getSelectedCard() {
         return selectedCard;
     }
-    /* --- --- --- --- --- */
 
-
-
-    /* ---------------- */
-    /* --- GameLoop --- */
     public void startGame() {
-        gameState.initializeGameSetup();
+        gameState.initializeGameSetup(); 
         if (gameView != null) {
-            gameView.updateView(); // Update the board and cards
+            gameView.updateView(); 
             gameView.showMessage("Game started. Player " + gameState.getCurrentPlayerId() + "'s turn.");
         }
     }
 
     public void resetGame() {
-        gameState.resetGame();
+        gameState.resetGame(); 
         selectedPiece = null;
         selectedCard = null;
         if (gameView != null) {
-            gameView.updateView(); // Reset the board and cards
-            gameView.showMessage("Game reset. Player " + gameState.getCurrentPlayerId() + "'s turn.");
+            startGame(); 
         }
     }
-    /* --- --- --- --- --- */
 
-
-
-    /* -------------------- */
-    /* --- Handle Input --- */
-    // Handle user input for cell clicks and card selections
     public void handleCellClick(int row, int col) {
-        if (gameState.isGameOver())
-            return;
+        if (gameState.isGameOver()) return;
+        if (gameView == null) return; 
 
         Player currentPlayer = gameState.getCurrentPlayer();
         Point clickedPoint = new Point(row, col);
 
-        // Step 1: Select piece
+        Piece pieceAtClick = gameState.getBoard().getPieceAt(row, col);
+
         if (selectedPiece == null) {
-            Piece pieceAtClick = gameState.getBoard().getPieceAt(row, col);
             if (pieceAtClick != null && pieceAtClick.isBelongTo(currentPlayer)) {
-                selectedPiece = pieceAtClick;
-                if (gameView != null) {
-                    gameView.highlightSelectedPiece(selectedPiece);
-                    // If a card is already selected, show possible moves for the selected piece
-                    if (selectedCard != null) {
-                        gameView.showPossibleMoves(
-                                gameState.getPossibleMoves(currentPlayer, selectedPiece, selectedCard));
-                    }
+                setSelectedPiece(pieceAtClick); 
+                if (selectedCard != null) {
+                    gameView.showPossibleMoves(
+                            gameState.getPossibleMoves(currentPlayer, selectedPiece, selectedCard));
                 }
             } else {
-                if (gameView != null)
-                    gameView.showMessage("Invalid piece selection.");
+                gameView.showMessage("Invalid piece selection. Select your piece.");
+            }
+        } else { 
+            if (pieceAtClick != null && pieceAtClick.isBelongTo(currentPlayer)) {
+                setSelectedPiece(pieceAtClick); 
+                if (selectedCard != null) {
+                    gameView.showPossibleMoves(
+                            gameState.getPossibleMoves(currentPlayer, selectedPiece, selectedCard));
+                } else {
+                    gameView.clearPossibleMoves(); 
+                }
+                return; 
             }
 
-        // Step 2: Already selected a piece -> select destination (or switch pieces)
-        } else {
-            Piece pieceAtClick = gameState.getBoard().getPieceAt(row, col);
-            if (pieceAtClick != null && pieceAtClick.isBelongTo(currentPlayer)) { // Switching pieces
-                selectedPiece = pieceAtClick;
-                if (gameView != null) {
-                    gameView.highlightSelectedPiece(selectedPiece);
-                    if (selectedCard != null) {
-                        gameView.showPossibleMoves(
-                                gameState.getPossibleMoves(currentPlayer, selectedPiece, selectedCard));
-                    } else {
-                        gameView.clearPossibleMoves(); // Delete possible moves if no card is selected
-                    }
-                }
+            if (selectedCard == null) {
+                gameView.showMessage("Please select a move card first.");
                 return;
             }
 
-            // Step 3: Already selected a piece and card -> perform move
-            if (selectedCard != null) {
-                // Save the previous position for animation
-                Point previousPosition = new Point(selectedPiece.getPosX(), selectedPiece.getPosY());
+            final Piece pieceToMove = this.selectedPiece; 
+            final MoveCard cardToPlay = this.selectedCard; 
+            final Point startPosition = new Point(pieceToMove.getPosX(), pieceToMove.getPosY()); 
+            final Point targetPosition = clickedPoint; 
 
-                boolean moveSuccessful = gameState.playTurn(selectedPiece, selectedCard, clickedPoint);
+            Piece victimPiece = gameState.getBoard().getPieceAt(targetPosition.x, targetPosition.y);
+            final boolean isCapture = (victimPiece != null && victimPiece.getPlayerId() != currentPlayer.getId());
+            final Piece capturedPieceForAnimation = isCapture ? victimPiece : null; 
+            final Point victimOriginalPos = isCapture && victimPiece != null ? new Point(victimPiece.getPosX(), victimPiece.getPosY()) : null;
 
-                if (moveSuccessful) {
-                    // Need to use final for movedPiece and playedCard
-                    final Piece movedPiece = selectedPiece;
-                    final MoveCard playedCard = selectedCard;
 
-                    // Reset after a successful move
-                    this.selectedPiece = null;
-                    this.selectedCard = null;
+            boolean moveSuccessful = gameState.playTurn(pieceToMove, cardToPlay, targetPosition);
 
-                    if (gameView != null) {
-                        // Make animations
-                        // After the move, update the view
-                        gameView.animateMove(movedPiece, previousPosition, clickedPoint, () -> {
-                            gameView.updateView(); // Update the board and cards
-                            if (gameState.isGameOver()) {
-                                gameView.showGameOver(gameState.getGameStatus());
-                            } else {
-                                gameView.showMessage("Player " + gameState.getCurrentPlayerId() + "'s turn.");
-                            }
-                            // Update player cards after the swap
-                            gameView.updatePlayerCards(gameState.getPlayer1());
-                            gameView.updatePlayerCards(gameState.getPlayer2());
-                            gameView.updateNeutralCard(gameState.getNeutralCardMove());
-                        });
-                    }
-                } else {
-                    if (gameView != null) {
-                        gameView.showMessage("Invalid move. Try again.");
-                        // Don't reset selectedPiece, selectedCard to allow user to try again
+            if (moveSuccessful) {
+                final Piece movedPieceForAnimation = pieceToMove; 
+                
+                if (gameView != null) {
+                    gameView.updateView(); 
+                    if (isCapture && capturedPieceForAnimation != null && victimOriginalPos != null) {
+                        // Tell BoardPanel to keep the victim visually present at its original spot
+                        gameView.stagePieceForDeathAnimation(capturedPieceForAnimation, victimOriginalPos);
                     }
                 }
-            } else {
-                if (gameView != null)
-                    gameView.showMessage("Please select a move card first.");
+                
+                this.selectedPiece = null;
+                this.selectedCard = null;
+                if (gameView != null) {
+                    gameView.clearHighlightsAndPossibleMoves(); 
+                }
+
+                Runnable finalMessageUpdates = () -> {
+                    if(gameView != null) {
+                        if (gameState.isGameOver()) {
+                            gameView.showGameOver(gameState.getGameStatus());
+                        } else {
+                            gameView.showMessage("Player " + gameState.getCurrentPlayerId() + "'s turn.");
+                        }
+                    }
+                };
+
+                Runnable afterDeathAnimation = finalMessageUpdates; 
+
+                Runnable afterMoveAndAttackAnimation = () -> {
+                    if (isCapture && capturedPieceForAnimation != null) {
+                        if(gameView != null) gameView.clearStagedDeathPiece(); // Stop drawing it as idle
+                        gameView.animateDeath(capturedPieceForAnimation, afterDeathAnimation);
+                    } else {
+                        finalMessageUpdates.run(); 
+                    }
+                };
+                
+                gameView.animateMove(movedPieceForAnimation, startPosition, targetPosition, isCapture, afterMoveAndAttackAnimation);
+
+            } else { 
+                gameView.showMessage("Invalid move. Try again.");
+                 gameView.clearPossibleMoves();
+                 if (this.selectedPiece != null && this.selectedCard != null) {
+                     gameView.showPossibleMoves(gameState.getPossibleMoves(currentPlayer, this.selectedPiece, this.selectedCard));
+                 }
             }
         }
     }
 
-    // Handle user input for card selection
     public void handleCardSelection(MoveCard card) {
-        if (gameState.isGameOver() || card == null)
-            return;
+        if (gameState.isGameOver() || card == null) return;
+        if (gameView == null) return;
 
         Player currentPlayer = gameState.getCurrentPlayer();
+        if (currentPlayer == null || gameState.getPlayer(currentPlayer.getId()) == null ) return;
+
+
         if (currentPlayer.hasMoveCard(card)) {
-            selectedCard = card;
-            if (gameView != null) {
-                gameView.highlightSelectedCard(selectedCard);
-                // If a piece is already selected, show possible moves for the selected piece
-                if (selectedPiece != null) {
-                    gameView.showPossibleMoves(gameState.getPossibleMoves(currentPlayer, selectedPiece, selectedCard));
-                }
+            setSelectedCard(card); 
+
+            if (selectedPiece != null) { 
+                gameView.showPossibleMoves(
+                        gameState.getPossibleMoves(currentPlayer, selectedPiece, selectedCard));
             }
         } else {
-            if (gameView != null)
-                gameView.showMessage("This card is not in your hand.");
+            gameView.showMessage("This card is not in your hand or it's not your turn to select it.");
         }
     }
-    /* --- --- --- --- --- */
 }

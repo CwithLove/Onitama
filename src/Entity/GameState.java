@@ -68,6 +68,16 @@ public class GameState {
         return board;
     }
 
+    public Player getPlayer(int playerId) {
+        if (playerId == 1) {
+            return player1;
+        } else if (playerId == 2) {
+            return player2;
+        } else {
+            throw new IllegalArgumentException("Invalid player ID: " + playerId);
+        }
+    }
+
     public Player getPlayer1() {
         return player1;
     }
