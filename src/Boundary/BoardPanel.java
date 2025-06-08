@@ -157,6 +157,18 @@ public class BoardPanel extends JPanel {
                     System.err.println("Warning: Failed to load border image: res/Map/Border_" + borderName + ".png");
                 }
             }
+            Image cornerImage = ResourceLoader.loadImage("res/Map/Border/Border_Down_Left.png");
+            if (cornerImage != null) {
+                bordersMap.put("Down_Left", cornerImage);
+            } else {
+                System.err.println("Warning: Failed to load corner image: res/Map/Border/Border_Down_Left.png");
+            }
+            cornerImage = ResourceLoader.loadImage("res/Map/Border/Border_Down_Right.png");
+            if (cornerImage != null) {
+                bordersMap.put("Down_Right", cornerImage);
+            } else {
+                System.err.println("Warning: Failed to load corner image: res/Map/Border/Border_Down_Right.png");
+            }
         } catch (Exception e) {
             System.err.println("Error loading border images: " + e.getMessage());
         }
@@ -489,35 +501,46 @@ public class BoardPanel extends JPanel {
                 Image floorImageToDraw = null;
                 Image borderImageToDraw = null;
 
-                if (row == 0 && col != 0 && col != currentBoard.getColumns() + 1) { // Top border
+
+                if (col == 0) { // Border LEFT
+                    if (row == currentBoard.getRows() + 1) {
+                        borderImageToDraw = borders.get("Down_Left");
+                    } else {
+                        borderImageToDraw = borders.get("Left");
+                    }
+                } else if (col == currentBoard.getColumns() + 1) { // Border RIGHT
+                    if (row == currentBoard.getRows() + 1) {
+                        borderImageToDraw = borders.get("Down_Right");
+                    } else {
+                        borderImageToDraw = borders.get("Right");
+                    }
+                } else if (row == 0) {
                     borderImageToDraw = borders.get("Up");
-                } else if (row == currentBoard.getRows() + 1 && col != 0 && col != currentBoard.getColumns() + 1) { // Bottom
-                                                                                                                    // border
+                } else if (row == currentBoard.getRows() + 1) {
                     borderImageToDraw = borders.get("Down");
-                } else if (col == 0 && row != currentBoard.getRows() + 1) { // Left border
-                    borderImageToDraw = borders.get("Left");
-                } else if (col == currentBoard.getColumns() + 1 && row != currentBoard.getRows() + 1) { // Right border
-                    borderImageToDraw = borders.get("Right");
-                } else {
-                    borderImageToDraw = floors.get("floor_2"); // No border for inner cells
-                }
+                } 
+
+
                 if (borderImageToDraw != null) {
                     g2d.drawImage(borderImageToDraw, cellX, cellY, dynamicCellSize, dynamicCellSize, this);
                     continue; // Skip drawing floor if border is present
                 }
 
-                if ((row + col) % 2 == 0) {
-                    floorImageToDraw = (floors != null) ? floors.get("floor_1") : null;
-                } else {
-                    floorImageToDraw = (floors != null) ? floors.get("floor_2") : null;
-                }
+                if (row != 0 && row != currentBoard.getRows() + 1 && col != 0 && col != currentBoard.getColumns() + 1) {
 
-                if (floorImageToDraw != null) {
-                    g2d.drawImage(floorImageToDraw, cellX, cellY, dynamicCellSize, dynamicCellSize, this);
-                } else {
-                    // Fallback to drawing colored rectangles if images are not loaded
-                    g2d.setColor(((row + col) % 2 == 0) ? new Color(209, 192, 147) : new Color(165, 131, 82));
-                    g2d.fillRect(cellX, cellY, dynamicCellSize, dynamicCellSize);
+                    if ((row + col) % 2 == 0) {
+                        floorImageToDraw = (floors != null) ? floors.get("floor_1") : null;
+                    } else {
+                        floorImageToDraw = (floors != null) ? floors.get("floor_2") : null;
+                    }
+
+                    if (floorImageToDraw != null) {
+                        g2d.drawImage(floorImageToDraw, cellX, cellY, dynamicCellSize, dynamicCellSize, this);
+                    } else {
+                        // Fallback to drawing colored rectangles if images are not loaded
+                        g2d.setColor(((row + col) % 2 == 0) ? new Color(209, 192, 147) : new Color(165, 131, 82));
+                        g2d.fillRect(cellX, cellY, dynamicCellSize, dynamicCellSize);
+                    }
                 }
                 // Draw grid lines for each cell
                 g2d.setColor(new Color(0, 0, 0, 50)); // Semi-transparent black
@@ -683,16 +706,19 @@ public class BoardPanel extends JPanel {
         if (piece.isMaster()) {
             Color pieceColor = (piece.getPlayerId() == 1) ? new Color(0, 0, 200) : new Color(200, 0, 0);
             g2d.setColor(pieceColor);
-            g2d.fillOval(centerX + dynamicCellSize - dynamicPieceSize / 2, centerY + dynamicCellSize - dynamicPieceSize / 2, dynamicPieceSize,
+            g2d.fillOval(centerX + dynamicCellSize - dynamicPieceSize / 2,
+                    centerY + dynamicCellSize - dynamicPieceSize / 2, dynamicPieceSize,
                     dynamicPieceSize);
             g2d.setColor(Color.BLACK);
-            g2d.drawOval(centerX + dynamicCellSize - dynamicPieceSize / 2, centerY + dynamicCellSize - dynamicPieceSize / 2, dynamicPieceSize,
+            g2d.drawOval(centerX + dynamicCellSize - dynamicPieceSize / 2,
+                    centerY + dynamicCellSize - dynamicPieceSize / 2, dynamicPieceSize,
                     dynamicPieceSize);
             g2d.setColor(Color.WHITE);
             int fontSize = Math.max(8, dynamicPieceSize / 3);
             g2d.setFont(new Font("Arial", Font.BOLD, fontSize));
             FontMetrics fm = g2d.getFontMetrics();
-            g2d.drawString("M", centerX + dynamicCellSize - fm.stringWidth("M") / 2, centerY + dynamicCellSize + fm.getAscent() / 2 - fm.getDescent() / 2);
+            g2d.drawString("M", centerX + dynamicCellSize - fm.stringWidth("M") / 2,
+                    centerY + dynamicCellSize + fm.getAscent() / 2 - fm.getDescent() / 2);
         } else {
             if (currentFrameImage != null) {
                 int imageX = centerX + dynamicCellSize - dynamicPieceSize / 2;

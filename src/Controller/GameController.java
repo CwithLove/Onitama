@@ -170,7 +170,7 @@ public class GameController {
         if (gameView == null) return;
 
         Player currentPlayer = gameState.getCurrentPlayer();
-        if (currentPlayer == null || gameState.getPlayer(currentPlayer.getId()) == null ) return;
+        if (currentPlayer == null || gameState.getCurrentPlayer() == null ) return;
 
 
         if (currentPlayer.hasMoveCard(card)) {
