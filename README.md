@@ -1,5 +1,21 @@
 # Onitama Game 🎮
 
+## Compile and Launch
+### To Compile
+``` bash
+javac -cp src -d out src/*.java
+```
+---
+### To run
+``` bash
+java -cp out Onitama
+```
+---
+
+
+## Functionnality
+
+
 ## Package: `Entity` 🧩
 
 The `Entity` package serves as the core of the Onitama game, containing all fundamental data objects and basic logic related to the game's components. It defines the structure of the board, pieces, movement cards, players, and the overall game state.
